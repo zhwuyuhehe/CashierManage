@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link rel="stylesheet" href="./layui/css/layui.css"/>
+    <link rel="icon" href="./pic/logo.png">
+    <link rel="stylesheet" href="./layui/index.css">
+    <script src="./layui/layui.js"></script>
+    <script src="./layui/sliderVerify.js"></script>
+    <script src="./layui/hashes.js"></script>
+    <script src="layui/loginFunction.js"></script>
+    <script src="./layui/logoutFunction.js"></script>
+    <script src="./layui/registerFunction.js"></script>
+    <script src="./vue/axios.min.js"></script>
+    <link rel="stylesheet" href="layui/myMenu.css">
+    <style>
+        .layui-nav-item a {
+            color: #2f363c !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="layui-header nav" id="menuIndex" style="display: none">
+    <div class="navInnerLogo layui-hide-xs layui-font-12">收银管理系统</div>
+    <div class="navItem">
+        <ul class="layui-nav" style="background: transparent;">
+            <li class="layui-nav-item"><a href="#" onclick="JumpTo()">职工信息</a></li>
+            <li class="layui-nav-item"><a href="cashier.html">收银系统</a></li>
+            <li class="layui-nav-item layui-unselect">
+                <a href="javascript:layui.layer.msg('Ops~点到我了');">
+                    <img src="./pic/logo.png" class="layui-nav-img" alt="logo">
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="./index.html">返回首页</a></dd>
+                    <dd><a href="javascript:logout();">退出登录</a></dd>
+                </dl>
+            </li>
+        </ul>
+
+    </div>
+</div>
+
+<fieldset class="layui-elem-field"  style="border-radius: 2em;position: absolute;margin-top: -16%;margin-right: 60% ;background-color: rgba(250,240,250,0.6);border: unset;width: 420px">
+    <legend>纯净·高效·精炼</legend>
+    <div class="layui-field-box layui-font-32">
+        基于 Spring Boot + Vue 的收银管理系统
+    </div>
+</fieldset>
+
+<div class="login-app">
+    <!-- 选择登录方式部分 -->
+    <div class="login-header" onclick="checkRadio()">
+        <input checked="checked" id="message" name="login-opt" type="radio">
+        <label class="m-btn" for="message">用户登录</label>
+        <input id="username" name="login-opt" type="radio">
+        <label class="u-btn" for="username">用户注册</label>
+    </div>
+
+
+
+    <!-- 登录表单部分 -->
+    <div class="login-body">
+        <div id="form-bar">
+            <!-- <form-append></form-append> -->
+            <!-- 用户登录表单 -->
+            <form action="#" class="m-form layui-form">
+                <div class="layui-form-item">
+                    <div class="layui-input-wrap">
+                        <div class="layui-input-prefix layui-input-split">
+                            <i class="layui-icon layui-icon-username"></i>
+                        </div>
+                        <input class="layui-input" lay-verify="my_phone" id="login_num" name="login_num"
+                               placeholder="请填写手机号" type="tel">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-wrap">
+                        <div class="layui-input-prefix layui-input-split">
+                            <i class="layui-icon layui-icon-password"></i>
+                        </div>
+                        <input class="layui-input" lay-verify="required" lay-affix="eye" id="login_pwd" name="login_pwd"
+                               placeholder="请填写密码"
+                               type="password">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-btn-fluid">
+                        <div id="slider"></div>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-row">
+                    <button class="layui-btn  layui-btn-normal layui-btn-fluid layui-btn-radius" id="login_btn"
+                            type="submit"
+                            lay-filter="formDemo"
+                            lay-submit
+                            style="margin: 0 0 10px 0;background: linear-gradient(129.12deg,#446dff,rgba(99, 125, 255, .75));">
+                        用户登录
+                    </button>
+                    <button class="layui-btn  layui-btn-normal layui-btn-fluid layui-btn-radius" id="reset_slider"
+                            type="reset"
+                            style="margin: 0 0 10px 0;background: linear-gradient(129.12deg,#446dff,rgba(99, 125, 255, .75));"
+                            onclick="logout()">
+                        重置页面
+                    </button>
+                </div>
+            </form>
+
+            <!-- 用户注册表单 -->
+            <form action="#" class="layui-form">
+
+                <div class="demo-reg-container" style="margin: 0">
+                    <div class="layui-form-item">
+                        <div class="layui-row">
+                            <div class="layui-input-wrap">
+                                <div class="layui-input-prefix">
+                                    <i class="layui-icon layui-icon-cellphone"></i>
+                                </div>
+                                <input autocomplete="off" class="layui-input" id="phoneNum" lay-reqtext="请填写手机号"
+                                       lay-verify="my_phone"
+                                       name="手机号" placeholder="手机号" style="margin: 0"
+                                       type="text" value="">
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="layui-form-item" style="margin: 0">
+                        <div class="layui-row">
+                            <div class="layui-input-wrap layui-col-xs8">
+                                <div class="layui-input-prefix">
+                                    <i class="layui-icon layui-icon-vercode"></i>
+                                </div>
+                                <input autocomplete="off" class="layui-input" lay-reqtext="请填写验证码"
+                                       lay-verify="confirmVerify" id="verifyNum" name="验证码"
+                                       placeholder="验证码" type="text" lay-affix="clear" maxlength="4" value="">
+                            </div>
+
+                            <div style="margin-left: 12px;">
+                                <div class="layui-col-xs4" id="app"
+                                     onclick="document.getElementById('verifyNum').value=null">
+                                    <script type="module" src="vue/captcha.js"></script>
+                                    <link rel="stylesheet" href="./vue/captcha.css">
+                                </div>
+                                <input id="validationCaptcha" disabled style="display: none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-input-wrap">
+                            <div class="layui-input-prefix">
+                                <i class="layui-icon layui-icon-password"></i>
+                            </div>
+                            <input autocomplete="off" class="layui-input" style="margin: 0" id="pwd" lay-affix="eye"
+                                   lay-verify="my_user_pwd"
+                                   name="密码" placeholder="密码" type="password" value="">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-wrap">
+                            <div class="layui-input-prefix">
+                                <i class="layui-icon layui-icon-password"></i>
+                            </div>
+                            <input autocomplete="off" class="layui-input" style="margin: 0" lay-affix="eye"
+                                   lay-verify="confirmPwd"
+                                   name="confirmPwd" placeholder="确认密码" type="password" value="">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <button class="layui-btn login-btn layui-btn-radius layui-btn-fluid" lay-filter="registerButton"
+                                lay-submit
+                                style="margin: 0">加入我们
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- <form-append></form-append> -->
+        </div>
+    </div>
+</div>
+
+<!-- 前端显示效果使用的JS -->
+<script>
+    let login_opt = document.getElementsByName('login-opt');
+    let form_bar = document.getElementById('form-bar');
+    const device = layui.device();
+    if (device.mobile) {
+        document.querySelector('.login-app').setAttribute('style', 'margin-left:0');
+    }
+
+    function checkRadio() {
+        for (let i = 0; i < login_opt.length; i++) {
+            if (login_opt[i].checked) {
+                form_bar.style.transform = 'translateX(' + (-348 * i) + 'px)';
+            }
+        }
+    }
+
+    !function () {
+        const menuDisplay = document.getElementById('menuIndex');
+        if (sessionStorage.getItem("userNickname")) {
+            menuDisplay.removeAttribute("style")
+        }
+    }()
+</script>
+</body>
+</html>

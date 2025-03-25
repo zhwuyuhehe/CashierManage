@@ -1,0 +1,8 @@
+-- 禁用外键约束检查
+SET REFERENTIAL_INTEGRITY FALSE;
+
+-- 删除所有数据库对象（表、视图、序列等）
+DROP ALL OBJECTS;
+
+-- 重新启用外键约束
+SET REFERENTIAL_INTEGRITY TRUE;

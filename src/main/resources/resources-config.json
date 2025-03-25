@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "cleanup.sql"
+      },
+      {
+        "pattern": "schema.sql"
+      },
+      {
+        "pattern": "data.sql"
+      },
+      {
+        "pattern": ".*\\.sql$"
+      }
+    ]
+  }
+}

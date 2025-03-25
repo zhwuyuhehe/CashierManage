@@ -1,0 +1,147 @@
+/*首页使用的样式表*/
+.demo-reg-container {
+    width: 320px;
+    margin: 21px auto 0;
+}
+
+.demo-reg-other .layui-icon {
+    position: relative;
+    display: inline-block;
+    margin: 0 2px;
+    top: 2px;
+    font-size: 26px;
+}
+
+body {
+    /*background-color: #ecefff;*/
+    background: url("../pic/pic1.png") no-repeat fixed center;
+    background-size: cover;
+
+    user-select: none; /* 这样用户点按钮的时候就不会选中文字, 更有沉浸感 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-app {
+    width: 348px;
+    margin-bottom: 40px;
+    margin-left: 60%;
+    opacity: 90%;
+}
+
+.login-header {
+    display: flex;
+}
+
+.login-header input[type="radio"] {
+    display: none;
+}
+
+.login-header label {
+    background-color: #f5f5f6;
+    font-size: 18px;
+    color: rgba(37, 38, 43, .36);
+    padding: 16px;
+    text-align: center;
+    width: 100%;
+    /* 这里并不是非得100%,利用的是flex的自动收缩,只要大于1/3就好了 */
+
+    cursor: pointer;
+}
+
+.login-header .m-btn {
+    border-top-left-radius: 12px;
+}
+
+.login-header .u-btn {
+    border-top-right-radius: 12px;
+}
+
+#message:checked + .m-btn,
+#username:checked + .u-btn {
+    background-color: #fff;
+    color: #25262b;
+    cursor: default;
+}
+
+
+.login-body {
+    overflow: hidden;
+    border-radius: 0 0 20px 20px;
+    background-color: #fff;
+    -webkit-border-radius: 0 0 20px 20px;
+    -moz-border-radius: 0 0 20px 20px;
+    -ms-border-radius: 0 0 20px 20px;
+    -o-border-radius: 0 0 20px 20px;
+}
+
+#form-bar {
+    display: flex;
+    transition: transform .6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    -webkit-transition: transform .6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    -moz-transition: transform .6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    -ms-transition: transform .6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    -o-transition: transform .6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.login-body form {
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 22px;
+    position: relative;
+}
+
+.login-body input {
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    /*height: 46px;*/
+    margin-bottom: 16px;
+    background-color: rgba(39, 39, 41, .04);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+    font-size: 14px;
+    padding: 1px 12px;
+    color: #25262b;
+}
+
+.login-body input::placeholder {
+    color: rgba(37, 38, 43, .36);
+}
+
+.login-body input:focus {
+    border: 1px solid rgba(99, 125, 255, .48);
+    background-color: #fff;
+}
+
+.login-body .login-btn {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(
+            129.12deg, /* 沿着这个角度的线渐变 */ #446dff, /* 渐变起始颜色 */ rgba(99, 125, 255, .75) /* 渐变终点颜色 */
+    );
+    color: #fff;
+    font-size: 16px;
+    margin-top: 16px;
+    margin-bottom: 60px;
+}
+
+button {
+    cursor: pointer;
+}
+
+#sure:not(:checked) ~ .login-btn {
+    opacity: .5;
+    cursor: not-allowed;
+}

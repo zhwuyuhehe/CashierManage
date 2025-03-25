@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>收银系统</title>
+    <link rel="stylesheet" href="./layui/myMenu.css">
+    <link rel="stylesheet" href="./layui/css/layui.css">
+    <link rel="icon" href="./pic/logo.png">
+    <script src="./layui/layui.js"></script>
+    <script src="./vue/axios.min.js"></script>
+    <script src="./layui/logoutFunction.js"></script>
+    <script>
+        if (sessionStorage.getItem("isActive") !== 'true') {
+            window.location.href = './user.html';
+        }
+    </script>
+</head>
+<body class="layui-bg-gray">
+
+<div class="layui-header nav">
+    <div class="navInnerLogo layui-hide-xs layui-font-16">收银管理系统</div>
+    <div id="ID-welcomeStatement" class="welcomeStatement layui-font-16 layui-text layui-clear layui-hide"></div>
+    <div class="navItem">
+        <div class="nowTime layui-font-16 layui-text layui-clear layui-hide-xs" id="nowTime"></div>
+        <ul class="layui-nav layui-bg-gray">
+            <li class="layui-nav-item"><a href="#" onclick="JumpTo()">职工信息</a></li>
+            <li class="layui-nav-item"><a href="cashier.html">收银系统</a></li>
+            <li class="layui-nav-item layui-unselect">
+                <a href="javascript:layui.layer.msg('Ops~点到我了');">
+                    <img src="./pic/logo.png" class="layui-nav-img" alt="logo">
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="./index.html">返回首页</a></dd>
+                    <dd><a href="javascript:logout();">退出登录</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // 完成时钟的渲染
+    layui.use(function () {
+        layui.jquery('#nowTime').html(layui.util.toDateString(new Date(), "HH:mm:ss"));
+        setInterval(currentTime, 1000);
+
+        function currentTime() {
+            layui.jquery('#nowTime').html(layui.util.toDateString(new Date(), "HH:mm:ss"));
+        }
+    });
+    let welcomeStatement = document.getElementById('ID-welcomeStatement');
+    // 完成用户欢迎语的渲染
+    if (sessionStorage.getItem("userNickname")){
+        welcomeStatement.classList.remove("layui-hide");
+        welcomeStatement.innerHTML="欢迎" + sessionStorage.getItem("userNickname");
+    }
+</script>
+
+<div class="layui-carousel" id="ID-apply-pics" style="display: none">
+    <!--    收款码轮播图-->
+    <div carousel-item>
+        <div><img src="./pic/zhifubao.jpg" width="300px"></div>
+        <div><img src="./pic/weixin.jpg" width="300px"></div>
+    </div>
+</div>
+
+<!--下方开始选购表格和结账表格-->
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-xs12 layui-col-md6">
+
+            <div class="layui-form">
+                <div class="layui-input-wrap">
+                    <div class="layui-input-prefix"><i class="layui-icon layui-icon-cart-simple"></i></div>
+                    <input type="text" lay-affix="search" lay-filter="searchRepo" lay-options="{split: true}"
+                           placeholder="搜索商品…" class="layui-input" autocomplete="false">
+                </div>
+            </div>
+            <table id="repoDemo" class="layui-hide"></table>
+
+        </div>
+
+
+        <div class="layui-col-xs12 layui-col-md6">
+            <div class="layui-form">
+                <div class="layui-input-wrap">
+                    <div class="layui-input-prefix"><i class="layui-icon layui-icon-username"></i></div>
+                    <input id="memberNum" name="memberNum" type="number" lay-options="{split: true}"
+                           placeholder="请输入会员号"
+                           class="layui-input" lay-affix="senior" lay-filter="searchMember" autocomplete="false">
+                </div>
+            </div>
+            <table id="billDemo" class="layui-hide"></table>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    layui.use(function () {
+        const table = layui.table;
+        const form = layui.form;
+        table.render({
+            elem: '#repoDemo',
+            id: 'goods',
+            text: {none: '要添加哪些商品呢？'},
+            cols: [[
+                {field: 'name', title: '商品名'},
+                {field: 'isn', title: '商品码'},
+                {field: 'price', title: '原价'},
+                {field: 'promoting', title: '折扣'},
+                {field: 'stock', title: '库存', hide: true}
+            ]],
+            data: [],
+        });
+
+        form.on('input-affix(searchRepo)', function (data) {
+            const elem = data.elem; // 输入框
+            const value = elem.value; // 输入框的值
+            if (!value) {
+                layer.msg('请输入搜索内容');
+                return elem.focus()
+            }
+            if ((/^\d*$/).test(value)) {
+                table.reloadData('goods', {
+                    url: '/SearchOneISN',
+                    where: {'ISN': value},
+                    method: 'post'
+                });
+                return false;
+            }
+
+            table.reloadData('goods', {
+                url: '/SearchRepository',
+                where: {'tradeName': value},
+                method: 'post'
+            });
+        });
+
+        // 行双击，添加到购物栏。
+        table.on('rowDouble(goods)', function (obj) {
+            let dataCache = obj.dataCache; // 得到当前行缓存数据，包含特定字段 --- 2.8.8+
+            let sellingPrice = dataCache.price * dataCache.promoting;
+            let cartData = table.getData('cart');
+            for (const cartDatum of cartData) {
+                if (cartDatum.name === dataCache.name) {
+                    layer.msg("请勿重复添加!", {icon: 0, time: 800});
+                    return false;
+                }
+            }
+            let addGoods = {};
+            addGoods['name'] = dataCache.name;
+            addGoods['price'] = sellingPrice.toFixed(2);
+            addGoods['count'] = 1;
+            addGoods['subTotal'] = sellingPrice.toFixed(2);
+            addGoods['stock'] = dataCache.stock;
+            cartData.push(addGoods);
+            table.reloadData('cart', {data: cartData});
+        });
+    });
+</script>
+
+
+<script>
+    layui.use(function () {
+        const layer = layui.layer;
+        const table = layui.table;
+        const util = layui.util;
+        const $ = layui.jquery;
+        const carousel = layui.carousel;
+        // 渲染 - 图片轮播
+        carousel.render({
+            elem: '#ID-apply-pics',
+            width: '300px',
+            height: '450px',
+            autoplay: false
+        });
+
+        // 已知数据渲染
+        table.render({
+            elem: '#billDemo',
+            method: 'post',
+            id: 'cart',
+            text: {none: '结账啦！'},
+            cols: [[ //标题栏
+                {
+                    field: 'name',
+                    title: '商品名',
+                    totalRowText: '合计'
+                },
+                {
+                    field: 'price',
+                    title: '售价',
+                    totalRowText: '<button id="btn_apply" class="layui-btn layui-btn-xs layui-btn-primary layui-border layui-btn-radius" lay-active="confirmPurchased">确认购买</button>'
+                },
+                {
+                    field: 'count', title: '数量', edit: 'text',
+                    totalRowText: '<button class="layui-btn layui-btn-xs layui-btn-primary layui-border layui-btn-radius" lay-active="refreshTable">清空商品</button>'
+                },
+                {field: 'subTotal', title: '小计', totalRow: '总价：{{= parseFloat(d.TOTAL_NUMS).toFixed(2) }}'},
+                {field: 'stock', title: '库存', hide: true}
+            ]],
+            data: [
+                // {name: '测试商品1', price: 200, count: 120, subTotal: 2400},
+                // {name: '测试商品2', price: 10, count: 20, subTotal: 200}
+            ],
+            totalRow: true
+        });
+
+        table.on('rowDouble(cart)', function (obj) {
+            layer.confirm('确认删除本行？', {
+                    btn: ['确定', '取消']
+                },
+                function (index) {
+                    let rowIndex = obj.index;
+                    let tableCache = table.cache['cart'];
+                    tableCache.splice(rowIndex, 1);
+                    table.reloadData('cart', {data: tableCache});
+                    obj.del();
+                    layer.close(index);
+                });
+        });
+
+        table.on('edit(cart)', function (obj) {
+            let field = obj.field; // 得到修改的字段
+            let value = obj.value // 得到修改后的值
+            let data = obj.data // 得到所在行所有键值
+            // 商品数量行，值的校验，使用正则匹配，验证是否包含非数字，若包含。则不符合表格数据，重新编辑。
+            if ((/\D/).test(value)) {
+                layer.tips('请输入正确的数量', this, {tips: 1});
+                return obj.reedit(); // 重新编辑 -- v2.8.0 新增
+            }
+            // 更新当前缓存数据
+            let update = {};
+            update[field] = value;
+            update['subTotal'] = (data.price * data.count).toFixed(2);
+            obj.update(update, true); // 参数 true 为 v2.7 新增功能，即同步更新其他包含自定义模板并可能存在关联的列视图
+            table.reloadData('cart');
+        });
+
+        layui.form.on('input-affix(searchMember)', function (data) {
+            const elem = data.elem; // 输入框
+            const value = elem.value; // 输入框的值
+            if (!value) {
+                layer.msg('请输入会员号');
+                return elem.focus();
+            }
+            if (elem.classList.contains('layui-disabled')) {
+                elem.removeAttribute("readonly");
+                elem.classList.remove("layui-disabled");
+                return elem.focus();
+            }
+            $.ajax({
+                url: '/MemberIsExist',
+                type: 'post',
+                async: false,
+                data: {'tel': value},
+                success: function (data) {
+                    if (data) {
+                        elem.classList.add("layui-disabled");
+                        elem.setAttribute("readonly", true);
+                    } else {
+                        $.ajax({
+                            url: '/RegisterMember',
+                            type: 'post',
+                            async: false,
+                            data: {'usr': value},
+                            success: function (data) {
+                                if (JSON.stringify(data) === "\"true\"") {
+                                    layer.msg("已经为您注册会员！", {icon: 6, time: 800});
+                                } else {
+                                    layer.msg(JSON.stringify(data), {icon: 2});
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
+        util.on('lay-active', {
+            refreshTable: layui.throttle(function (othis) {
+                table.reload('cart', {data: []});
+                layer.msg("清空购物栏");
+            }, 3000), // 3s 内不重复执行
+            confirmPurchased: layui.throttle(function (othis) {
+                let totalPrice = document.querySelectorAll('div.laytable-cell-2-0-3');
+                layer.open({
+                    type: 1,
+                    shade: 0.8,
+                    shadeClose: true,
+                    area: 'auto',
+                    title: totalPrice[totalPrice.length-1].innerHTML,
+                    content: $('#ID-apply-pics'),
+                    end: function () {
+                        layer.confirm("是否完成支付？", {icon: 3, btn: ['未支付', '已支付'],title:'请审查'}, function () {
+                            layer.closeAll();
+                            document.getElementById('btn_apply').click();
+                        }, function () {
+                            layer.msg("正在检测付款状态！", {icon: 16,shade:0.01,time:1280}, function () {
+                                let thisOptions = table.getOptions('cart');
+                                // console.log(thisOptions);
+                                let memberNumber = $('#memberNum').val() === '' ? '10000000000' : $('input[name="memberNum"]').val();
+                                // console.log("会员号：" + memberNumber + "\n数据：" + JSON.stringify(thisOptions.data));
+
+                                $.ajax({
+                                    url: '/BillInsert',
+                                    type: 'post',
+                                    async: true,
+                                    data: {
+                                        member: memberNumber,
+                                        cartData: JSON.stringify(thisOptions.data)
+                                    },
+                                    success(resData) {
+                                        layer.msg("欢迎再次惠顾！");
+                                        table.reload('cart', {data: []});
+                                        // console.log(resData);
+                                    },
+                                    error: function (errData) {
+                                        let res = JSON.stringify(errData);
+                                        layer.alert('服务器异常' + res, {icon: 2});
+                                    }
+                                });
+                            })
+                        });
+                    }
+                })
+            }, 1600)
+        });
+    });
+</script>
+
+</body>
+</html>

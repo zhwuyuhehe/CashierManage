@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: 收银管理系统-演示
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:zlinux;IGNORECASE=TRUE;DATABASE_TO_UPPER=false
+    username: zlinux
+    password: zlinux
+  h2:
+    console:
+      enabled: false
+      settings:
+        web-allow-others: false
+      path: /h2
+  jpa:
+    database: h2
+    show-sql: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+  threads:
+    virtual:
+      enabled: true
+  sql:
+    init:
+      username: zlinux
+      password: zlinux
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+      mode: always
+logging:
+  charset:
+    console: GBK
+    file: UTF-8
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+server:
+  servlet:
+    session:
+      cookie:
+        name: Z-Spaces
+      timeout: 600
+  undertow:
+    url-charset: UTF-8
